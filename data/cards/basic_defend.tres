@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=2 format=3 uid="uid://dst3v0h877hvh"]
+
+[ext_resource type="Script" uid="uid://duejf5y151jec" path="res://scripts/data/card_data.gd" id="1_j8rmk"]
+
+[resource]
+script = ExtResource("1_j8rmk")
+id = "basic_defend"
+title = "基础心法"
+description = "获得 {block} 点真气"
+card_type = 1
+block = 5
+fusion_group = "心法"
+metadata/_custom_type_script = "uid://duejf5y151jec"
