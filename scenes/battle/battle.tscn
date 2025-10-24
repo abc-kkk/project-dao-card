@@ -79,6 +79,59 @@ text = "灵力: 3/3"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="EndTurnButton" type="Button" parent="UI_Layer/BattleUI"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -156.0
+offset_top = -207.0
+offset_right = -17.0
+offset_bottom = -149.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "回合结束"
+
+[node name="PlayerStatsUI" type="VBoxContainer" parent="UI_Layer/BattleUI"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -224.0
+offset_right = 137.0
+offset_bottom = -131.0
+grow_vertical = 0
+
+[node name="PlayerHealthLabel" type="Label" parent="UI_Layer/BattleUI/PlayerStatsUI"]
+layout_mode = 2
+text = "HP: 50/50"
+
+[node name="PlayerBlockLabel" type="Label" parent="UI_Layer/BattleUI/PlayerStatsUI"]
+layout_mode = 2
+text = "真气: 0"
+
+[node name="EnemyStatsUI" type="VBoxContainer" parent="UI_Layer/BattleUI"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -124.0
+offset_top = 44.0
+offset_right = -6.0
+offset_bottom = 117.0
+grow_horizontal = 0
+
+[node name="EnemyHealthLabel" type="Label" parent="UI_Layer/BattleUI/EnemyStatsUI"]
+layout_mode = 2
+text = "HP: 30/30"
+
+[node name="EnemyBlockLabel" type="Label" parent="UI_Layer/BattleUI/EnemyStatsUI"]
+layout_mode = 2
+text = "真气: 0"
+
 [node name="AimingArrow" type="Line2D" parent="."]
 visible = false
 z_index = 11

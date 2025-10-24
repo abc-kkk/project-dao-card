@@ -56,10 +56,10 @@ func add_block(amount: int):
 
 # 回合开始时调用
 func on_turn_start():
+	block = 0
 	# 圣遗物/Buff结算... (暂时留空)
 	pass
 
 # 回合结束时调用
 func on_turn_end():
-	# 移除所有护甲
-	block = 0
+	pass

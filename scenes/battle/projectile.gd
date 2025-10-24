@@ -3,7 +3,7 @@ extends Node2D
 
 # 这两个变量将由 BattleManager 传入
 var target: Node2D = null
-var speed: float = 1000.0 # 像素/秒
+var speed: float = 2000.0 # 像素/秒
 
 func _process(delta: float):
 	# 如果没有目标，就什么也别做

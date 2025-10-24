@@ -5,6 +5,8 @@ extends Area2D
 signal enemy_clicked(enemy_instance)
 signal stats_changed(stats)
 signal enemy_died
+# [新代码] 定义一个信号，告诉 BattleManager 它想攻击
+signal wants_to_attack(damage)
 
 # 敌人的战斗属性
 var health: int = 30:
@@ -64,5 +66,10 @@ func add_block(amount: int):
 
 func do_action():
 	# 敌人的AI (暂时留空)
-	print("敌人行动！(暂时什么也不做)")
-	pass
+	# 这是一个非常简单的 "AI": 总是攻击 5 点伤害
+	var attack_damage = 5 
+	print("敌人行动！ 准备攻击 %d 点伤害" % attack_damage)
+
+	# [新代码] 发出信号，让 BattleManager 去处理
+	emit_signal("wants_to_attack", attack_damage)
+	

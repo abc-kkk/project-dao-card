@@ -3,10 +3,14 @@
 extends Control
 
 # 我们需要"引用"场景中的节点，以便给它们赋值
-@onready var title_label: Label = $NinePatchRect/MarginContainer/VBoxContainer/Title
-@onready var art_rect: ColorRect = $NinePatchRect/MarginContainer/VBoxContainer/Art
-@onready var description_label: RichTextLabel = $NinePatchRect/MarginContainer/VBoxContainer/Description
-@onready var cost_label: Label = $Cost
+@onready var title_label: Label = $VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer/Title
+@onready var art_rect: ColorRect = $VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer/Art
+@onready var description_label: RichTextLabel = $VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer/Description
+@onready var cost_label: Label = $VisualsGroup/Cost
+@onready var visuals_group: CanvasGroup = $VisualsGroup
+
+# Shader控制器
+var shader_controller: Node
 
 # 关键！这个变量用来"持有"卡牌的数据
 # 当我们设置这个变量时，卡牌UI会自动更新
@@ -46,9 +50,26 @@ func clear_display():
 	art_rect.texture = null
 	description_label.text = ""
 	
+# --- Shader控制方法 ---
+func setup_shader_controller():
+	# 创建shader控制器
+	shader_controller = preload("res://scripts/ui/card_shader_controller.gd").new()
+	add_child(shader_controller)
+
+func dissolve_in(duration: float = 0.5):
+	if shader_controller:
+		shader_controller.dissolve_in(duration)
+
+func dissolve_out(duration: float = 0.5):
+	if shader_controller:
+		shader_controller.dissolve_out(duration)
+
 # --- 编辑器预览 (关键!) ---
 # Godot 的特殊函数，只在编辑器中运行
 func _ready():
+	# 设置shader控制器
+	setup_shader_controller()
+	
 	# 检查代码是否在编辑器中运行，而不是在游戏里
 	if Engine.is_editor_hint():
 		# 尝试加载我们的测试卡牌

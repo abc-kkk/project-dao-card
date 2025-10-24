@@ -14,3 +14,5 @@ res://assets/textures/line_noise.tres
 res://scenes/battle/player.tscn
 res://scenes/battle/projectile.tscn
 res://scenes/battle/projectile.gd
+res://scripts/battle/player.gd
+res://assets/shaders/card_dissolve.gdshader

@@ -8,7 +8,8 @@ const CardUI_Scene = preload("res://scenes/ui/card_ui.tscn")
 # 预加载我们的卡牌“数据”。
 const BasicStrike_Data = preload("res://data/cards/basic_strike.tres")
 const BasicDefend_Data = preload("res://data/cards/basic_defend.tres")
-
+# 投射物
+const Projectile_Scene = preload("res://scenes/battle/projectile.tscn")
 
 # -------- 节点引用 --------
 # 引用UI，以便更新它们
@@ -19,6 +20,16 @@ const BasicDefend_Data = preload("res://data/cards/basic_defend.tres")
 @onready var aiming_arrow: Line2D = $AimingArrow
 @onready var player: Node2D = $Player
 @onready var enemy: Area2D = $Enemy 
+# 按钮引用
+@onready var end_turn_button: Button = $UI_Layer/BattleUI/EndTurnButton
+
+# 玩家状态UI引用
+@onready var player_health_label: Label = $UI_Layer/BattleUI/PlayerStatsUI/PlayerHealthLabel
+@onready var player_block_label: Label = $UI_Layer/BattleUI/PlayerStatsUI/PlayerBlockLabel
+
+# 敌人状态UI引用
+@onready var enemy_health_label: Label = $UI_Layer/BattleUI/EnemyStatsUI/EnemyHealthLabel
+@onready var enemy_block_label: Label = $UI_Layer/BattleUI/EnemyStatsUI/EnemyBlockLabel
 
 # -------- 战斗状态变量 --------
 # 我们用数组(Array)来管理卡牌“数据”(CardData)，而不是卡牌“场景”(CardUI)
@@ -46,6 +57,16 @@ func _ready():
 	# 当它们发出 "enemy_clicked" 信号时，
 	# 调用我们(self)的 "on_enemy_clicked" 函数
 	get_tree().call_group("enemies", "connect", "enemy_clicked", on_enemy_clicked)
+	
+	# [新代码] 连接状态UI信号
+	player.stats_changed.connect(update_player_stats_ui)
+	enemy.stats_changed.connect(update_enemy_stats_ui)
+
+	# [新代码] 连接回合结束按钮
+	end_turn_button.pressed.connect(on_end_turn_pressed)
+	# 它告诉 battle.gd 去“收听”敌人的“wants_to_attack”信号
+	enemy.wants_to_attack.connect(on_enemy_attacks)
+	
 # [修正] 替换整个 _process 函数
 func _process(delta: float):
 	if is_waiting_for_target:
@@ -116,18 +137,23 @@ func start_battle():
 	update_ui()
 	
 	# e. 抽5张初始手牌
-	draw_cards(5)
+	await draw_cards(5)
 
 
+
+# [重构]
 # 2. 抽卡
 func draw_cards(amount: int):
+	
+	var draw_start_pos = draw_pile_label.get_global_rect().get_center()
+	var animation_duration = 0.3 # 抽牌动画时长
+	var delay_between_cards = 0.1 # 每张卡抽出的间隔
+	var current_delay = 0.0
+
 	for i in range(amount):
 		# a. 检查抽牌堆是否为空？
 		if draw_pile.is_empty():
-			# b. 如果是，则将弃牌堆洗回抽牌堆
 			shuffle_discard_into_draw_pile()
-			
-			# c. 如果洗完还是空的 (说明玩家没牌了)，就停止抽卡
 			if draw_pile.is_empty():
 				print("牌库已抽干！")
 				break
@@ -143,16 +169,47 @@ func draw_cards(amount: int):
 		
 		# g. 【关键】把卡牌“数据”喂给卡牌“UI”
 		card_ui_instance.data = card_data_to_draw
-		# [新代码] 连接这个新实例的 "card_clicked" 信号
-		# 到我们自己的 "on_card_clicked" 函数上
 		card_ui_instance.card_clicked.connect(on_card_clicked)
+		# --- [新动画逻辑] ---
 		
-		# h. 把实例化的卡牌UI，作为子节点添加到 HandContainer 中
+		# 1. 先让卡牌“隐形”
+		card_ui_instance.modulate.a = 0.0
+		# 2. 设置一个初始旋转 (像 StS 一样)
+		card_ui_instance.rotation_degrees = -90
+		
+		# 3. 【关键】把实例化的卡牌UI，作为子节点添加到 HandContainer 中
 		hand_container.add_child(card_ui_instance)
-	
+		
+		# 4. 【关键】等待一帧，让 HBoxContainer 重新计算所有卡牌的位置
+		await get_tree().create_timer(0.01).timeout # 等待一个极短的时间
+		
+		# 5. 获取 HBoxContainer 分配给它的“最终位置”
+		var final_pos = card_ui_instance.global_position
+		
+		# 6. 【戏法】把卡牌“瞬移”到抽牌堆的位置
+		card_ui_instance.global_position = draw_start_pos
+		
+		# 7. 让卡牌“现形”
+		card_ui_instance.modulate.a = 1.0
+		
+		# 8. 创建 Tween 动画
+		var tween = create_tween()
+		#tween.set_delay(current_delay) # 延迟，实现一张张抽
+		current_delay += delay_between_cards
+		
+		tween.set_parallel(true) # 位置和旋转同时进行
+		
+		# 9. 动画: 移动到最终位置
+		tween.tween_property(card_ui_instance, "global_position", final_pos, animation_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		# 10. 动画: 旋转回 0 度
+		tween.tween_property(card_ui_instance, "rotation_degrees", 0, animation_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		
 	# 抽完卡后，更新一下UI
 	update_ui()
-
+	
+	# [新] 等待最后一张卡牌的动画播放完毕
+	var total_wait_time = current_delay + animation_duration
+	await get_tree().create_timer(total_wait_time).timeout
 
 # 3. 洗牌
 func shuffle_discard_into_draw_pile():
@@ -172,6 +229,18 @@ func update_ui():
 	discard_pile_label.text = "弃牌堆: %d" % discard_pile.size()
 	energy_label.text = "灵力: %d/%d" % [energy, energy_max]
 
+# [新函数]
+# 当 player 发出 "stats_changed" 信号时调用
+func update_player_stats_ui(stats: Dictionary):
+	player_health_label.text = "HP: %d/%d" % [stats.health, stats.max_health]
+	player_block_label.text = "真气: %d" % stats.block
+
+# [新函数]
+# 当 enemy 发出 "stats_changed" 信号时调用
+func update_enemy_stats_ui(stats: Dictionary):
+	enemy_health_label.text = "HP: %d/%d" % [stats.health, stats.max_health]
+	enemy_block_label.text = "护甲: %d" % stats.block
+
 # [重构] 修改 on_card_clicked 函数
 func on_card_clicked(card_ui: Control, card_data: CardData):
 
@@ -185,7 +254,7 @@ func on_card_clicked(card_ui: Control, card_data: CardData):
 		# 2. 检查是否需要目标
 		if card_data.target_type == CardData.TargetType.NONE:
 			# 不需要目标 (如“心法”)，立即打出
-			play_card(card_ui, card_data, null) # null 表示没有目标
+			await play_card(card_ui, card_data, null) # null 表示没有目标
 
 		elif card_data.target_type == CardData.TargetType.ENEMY:
 			# 需要目标 (如“拳法”)，进入“等待目标”状态
@@ -214,7 +283,8 @@ func play_card(card_ui: Control, card_data: CardData, target: Node2D):
 	# c. 移动卡牌 (数据 和 UI)
 	hand.erase(card_data)
 	discard_pile.append(card_data)
-	card_ui.queue_free()
+	# 销毁卡牌
+	await card_ui.play_destroy_animation()
 
 	# d. 清理状态 (无论如何都清理)
 	cancel_aiming()
@@ -232,21 +302,31 @@ func cancel_aiming():
 	# 立即隐藏箭头并清空点
 	aiming_arrow.visible = false
 	aiming_arrow.clear_points()
-
+	
 # [重构]
 func apply_card_effect(card_data: CardData, target: Node2D):
 	# (target 在这里就是 enemy 实例)
-	
+
 	if card_data.damage > 0:
-		if target: # 确保有目标 (target 就是 enemy)
-			# [修改] 不再打印，而是调用函数
+		if target and is_instance_valid(target): # 确保目标存在
+			# 1. [逻辑] 立即造成伤害
 			target.take_damage(card_data.damage)
+
+			# 2. [表现] 生成一个“飞行特效”
+			var projectile = Projectile_Scene.instantiate()
+			projectile.target = target # 告诉投射物要飞向谁
+
+			# 把投射物添加到场景中 (放在 Battle 节点下)
+			# 并设置它的起始位置为玩家的位置
+			projectile.global_position = player.global_position
+			add_child(projectile)
+
 		else:
 			print("错误：攻击卡没有目标！") 
-			
+
 	if card_data.block > 0:
-		# [修改] 护甲是给玩家的
 		player.add_block(card_data.block)
+		
 		
 # 当任何一个在 "enemies" 分组的节点发出 "enemy_clicked" 信号时调用
 func on_enemy_clicked(enemy_instance: Node2D):
@@ -256,7 +336,7 @@ func on_enemy_clicked(enemy_instance: Node2D):
 	if is_waiting_for_target:
 		# 是的！我们等的就是你！
 		# 使用我们之前存好的卡牌，和刚被点击的敌人，打出这张卡
-		play_card(card_ui_pending_target, card_pending_target, enemy_instance)
+		await play_card(card_ui_pending_target, card_pending_target, enemy_instance)
 
 	else:
 		# 玩家只是随便点点敌人，我们不关心
@@ -269,4 +349,100 @@ func _unhandled_input(event: InputEvent) -> void:
 		cancel_aiming()
 		# 标记事件已被“处理”，防止它继续传递
 		get_tree().get_root().set_input_as_handled()
+
+func on_end_turn_pressed():
+	print("--- 玩家回合结束 ---")
+	# a. 禁用按钮，防止玩家在回合过渡时连点
+	end_turn_button.disabled = true
+	# b. 弃掉所有手牌
+	await discard_hand() # await 关键字会等待函数完成
+	# c. 结算玩家回合结束 (清零护甲)
+	player.on_turn_end()
+	# d. 等待 0.5 秒，让玩家看清护甲消失
+	await get_tree().create_timer(0.5).timeout
+
+	# e. 执行敌人回合
+	print("--- 敌人回合开始 ---")
+	await enemy_turn()
+
+	# f. 等待 0.5 秒，让玩家反应敌人攻击
+	await get_tree().create_timer(0.5).timeout
+
+	# g. 开始玩家的新回合
+	print("--- 玩家新回合开始 ---")
+	start_player_turn()
+
+	# h. 重新启用按钮
+	end_turn_button.disabled = false
+# [重构 - 已修复]
+func discard_hand():
+	print("弃掉所有手牌...")
+	for card_data in hand:
+		discard_pile.append(card_data)
+	hand.clear()
+	
+	var discard_target_pos = discard_pile_label.get_global_rect().get_center()
+	var animation_duration = 0.3
+	var delay_between_cards = 0.05 # 每张卡飞走的间隔
+
+	var cards_to_discard = hand_container.get_children()
+	
+	if cards_to_discard.is_empty():
+		update_ui()
+		return
+
+	for card_ui in cards_to_discard:
+		# [新修复]
+		# 1. 我们在这里等待一个短暂的延迟
+		#    而不是在 Tween 上设置它
+		await get_tree().create_timer(delay_between_cards).timeout
+		
+		# 2. 脱离 HBoxContainer 的控制
+		var start_pos = card_ui.global_position
+		card_ui.reparent(hand_container.get_parent()) 
+		card_ui.global_position = start_pos 
+		
+		# 3. 创建一个新 Tween
+		var tween = create_tween()
+		
+		# 4. [已移除] 不再需要 tween.set_delay()
+		
+		# 5. 并行动画
+		tween.set_parallel(true)
+		tween.tween_property(card_ui, "global_position", discard_target_pos, animation_duration).set_ease(Tween.EASE_IN)
+		tween.tween_property(card_ui, "scale", Vector2.ZERO, animation_duration).set_ease(Tween.EASE_IN)
+		
+		# 6. 动画结束后，删除卡牌
+		tween.chain().tween_callback(card_ui.queue_free)
+	
+	update_ui()
+	
+	# [新修复] 我们不再需要复杂的总时间计算
+	# 我们只需要等待最后一张卡牌的动画完成
+	await get_tree().create_timer(animation_duration).timeout
+# 3. (新函数) 敌人回合的逻辑
+func enemy_turn():
+	# a. 让敌人执行它的AI
+	enemy.do_action()
+
+	# b. 等待1秒钟，模拟敌人“思考”和“攻击动画”
+	await get_tree().create_timer(1.0).timeout
+	print("敌人结束行动")
+
+
+# 4. (新函数) 玩家新回合的逻辑
+func start_player_turn():
+	player.on_turn_start()
+	energy = energy_max
+
+	await draw_cards(5) # <--- [添加 AWAIT]
+
+
+# [新函数]
+# 当 enemy 发出 "wants_to_attack" 信号时调用
+func on_enemy_attacks(damage: int):
+	print("BattleManager 收到敌人 %d 点攻击" % damage)
+	player.take_damage(damage)
+	
+	
 	

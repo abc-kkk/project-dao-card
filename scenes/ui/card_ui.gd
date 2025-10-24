@@ -6,12 +6,22 @@ extends Control
 # 它会把自己（CardUI 实例）和自己的数据（CardData）一起广播出去
 signal card_clicked(card_ui,card_data)
 
-# --- 节点引用 (你的路径是正确的) ---
-@onready var title_label: Label = $NinePatchRect/MarginContainer/VBoxContainer/Title
-@onready var art_rect: ColorRect = $NinePatchRect/MarginContainer/VBoxContainer/Art
-@onready var description_label: RichTextLabel = $NinePatchRect/MarginContainer/VBoxContainer/Description
-@onready var cost_label: Label = $Cost
+# [修改]
+@export var dissolve_proxy: float = 0.0:
+	set(value):
+		dissolve_proxy = value 
+		# [修改] 不再是 self.material, 而是 visuals_group.material
+		if visuals_group.material:
+			var mat = visuals_group.material as ShaderMaterial
+			if mat:
+				mat.set_shader_parameter("dissolve_amount", value)
 
+# --- 节点引用 (你的路径是正确的) ---
+@onready var title_label: Label = $VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer/Title
+@onready var art_rect: ColorRect = $VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer/Art
+@onready var description_label: RichTextLabel = $VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer/Description
+@onready var cost_label: Label = $VisualsGroup/Cost
+@onready var visuals_group: CanvasGroup = $VisualsGroup
 # --- 核心变量 ---
 var data: CardData:
 	set(new_data):
@@ -125,3 +135,22 @@ func _on_mouse_exited():
 	# 3. 让 "scale" 属性在 0.1 秒内
 	#    恢复到 Vector2(1.0, 1.0)
 	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.1)
+	
+# [修改]
+func play_destroy_animation():
+	# [修改] 检查 visuals_group.material
+	var mat = visuals_group.material as ShaderMaterial
+	if not mat:
+		print("错误: VisualsGroup 上没有 ShaderMaterial!")
+		queue_free()
+		return
+
+	var tween = get_tree().create_tween()
+	var duration = 0.4 
+
+	# [不变] 这行是正确的, Tween 驱动 self 上的 "dissolve_proxy"
+	tween.tween_property(self, "dissolve_proxy", 1.0, duration)
+
+	await tween.finished
+
+	queue_free()
