@@ -3,11 +3,11 @@
 extends Control
 
 # 我们需要"引用"场景中的节点，以便给它们赋值
-@onready var title_label: Label = $VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer/Title
-@onready var art_rect: ColorRect = $VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer/Art
-@onready var description_label: RichTextLabel = $VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer/Description
-@onready var cost_label: Label = $VisualsGroup/Cost
-@onready var visuals_group: CanvasGroup = $VisualsGroup
+@onready var title_label: Label = $NinePatchRect/MarginContainer/VBoxContainer/Title
+@onready var art_rect: ColorRect = $NinePatchRect/MarginContainer/VBoxContainer/Art
+@onready var description_label: RichTextLabel = $NinePatchRect/MarginContainer/VBoxContainer/Description
+@onready var cost_label: Label = $Cost
+@onready var nine_patch_rect: NinePatchRect = $NinePatchRect
 
 # Shader控制器
 var shader_controller: Node

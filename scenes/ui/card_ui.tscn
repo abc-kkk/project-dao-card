@@ -1,12 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://bqx8v7k8j8q4s"]
+[gd_scene load_steps=6 format=3 uid="uid://bqx8v7k8j8q4s"]
 
 [ext_resource type="Shader" uid="uid://c56v28i0gec70" path="res://assets/shaders/card_dissolve.gdshader" id="1_1kpl7"]
 [ext_resource type="Script" uid="uid://ypehn4r5hjij" path="res://scenes/ui/card_ui.gd" id="1_s55cg"]
 [ext_resource type="Texture2D" uid="uid://dahw655m4ne4x" path="res://assets/textures/line_noise.tres" id="2_fbbsm"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_fbbsm"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_wc1mw"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dissolve"]
 shader = ExtResource("1_1kpl7")
 shader_parameter/dissolve_amount = 0.0
 shader_parameter/noise_texture = ExtResource("2_fbbsm")
@@ -28,19 +26,17 @@ grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(75, 220)
 script = ExtResource("1_s55cg")
-dissolve_proxy = null
 
-[node name="VisualsGroup" type="CanvasGroup" parent="."]
-material = SubResource("ShaderMaterial_wc1mw")
-
-[node name="NinePatchRect" type="NinePatchRect" parent="VisualsGroup"]
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+material = SubResource("ShaderMaterial_dissolve")
 
-[node name="MarginContainer" type="MarginContainer" parent="VisualsGroup/NinePatchRect"]
+[node name="MarginContainer" type="MarginContainer" parent="NinePatchRect"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -53,23 +49,23 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="VisualsGroup/NinePatchRect/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="NinePatchRect/MarginContainer"]
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Title" type="Label" parent="VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer"]
+[node name="Title" type="Label" parent="NinePatchRect/MarginContainer/VBoxContainer"]
 layout_mode = 2
 text = "基础拳法"
 horizontal_alignment = 1
 
-[node name="Art" type="ColorRect" parent="VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer"]
+[node name="Art" type="ColorRect" parent="NinePatchRect/MarginContainer/VBoxContainer"]
 material = SubResource("ShaderMaterial_1kpl7")
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 mouse_filter = 2
 color = Color(0.69803923, 0.13333334, 0.13333334, 1)
 
-[node name="Description" type="RichTextLabel" parent="VisualsGroup/NinePatchRect/MarginContainer/VBoxContainer"]
+[node name="Description" type="RichTextLabel" parent="NinePatchRect/MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
@@ -77,12 +73,14 @@ bbcode_enabled = true
 text = "造成 6 点伤害"
 fit_content = true
 
-[node name="Cost" type="Label" parent="VisualsGroup"]
+[node name="Cost" type="Label" parent="."]
 custom_minimum_size = Vector2(25, 25)
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -25.0
+offset_left = -1945.0
+offset_right = -1920.0
 offset_bottom = 25.0
 grow_horizontal = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_2")

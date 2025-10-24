@@ -18,19 +18,15 @@ extends Node
 		update_shader()
 
 # 引用需要应用shader的节点
-var visuals_group: CanvasGroup
+var nine_patch_rect: NinePatchRect
 var shader_material: ShaderMaterial
 
 func _ready():
-	# 获取VisualsGroup节点
-	visuals_group = get_parent().get_node("VisualsGroup")
+	# 获取NinePatchRect节点
+	nine_patch_rect = get_parent().get_node("NinePatchRect")
 	
-	# 创建shader material
-	shader_material = ShaderMaterial.new()
-	shader_material.shader = load("res://assets/shaders/card_dissolve.gdshader")
-	
-	# 应用shader到VisualsGroup
-	visuals_group.material = shader_material
+	# 获取现有的shader material
+	shader_material = nine_patch_rect.material as ShaderMaterial
 	
 	# 初始化shader参数
 	update_shader()
