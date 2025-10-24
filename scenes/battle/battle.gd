@@ -17,6 +17,8 @@ const BasicDefend_Data = preload("res://data/cards/basic_defend.tres")
 @onready var discard_pile_label: Label = $UI_Layer/BattleUI/PileContainer/DiscardPileLabel
 @onready var energy_label: Label = $UI_Layer/BattleUI/EnergyLabel
 @onready var aiming_arrow: Line2D = $AimingArrow
+@onready var player: Node2D = $Player
+@onready var enemy: Area2D = $Enemy 
 
 # -------- 战斗状态变量 --------
 # 我们用数组(Array)来管理卡牌“数据”(CardData)，而不是卡牌“场景”(CardUI)
@@ -231,18 +233,20 @@ func cancel_aiming():
 	aiming_arrow.visible = false
 	aiming_arrow.clear_points()
 
-# [重构] 修改 apply_card_effect 函数，让它接收一个 target
+# [重构]
 func apply_card_effect(card_data: CardData, target: Node2D):
+	# (target 在这里就是 enemy 实例)
+	
 	if card_data.damage > 0:
-		if target: # 确保有目标
-			print("对 %s 造成 %d 点伤害" % [target.name, card_data.damage])
-			# (以后这里会调用 target.take_damage(card_data.damage))
+		if target: # 确保有目标 (target 就是 enemy)
+			# [修改] 不再打印，而是调用函数
+			target.take_damage(card_data.damage)
 		else:
-			# 这种情况不应该发生，除非逻辑错了
 			print("错误：攻击卡没有目标！") 
-
+			
 	if card_data.block > 0:
-		print("玩家获得 %d 点真气" % card_data.block)
+		# [修改] 护甲是给玩家的
+		player.add_block(card_data.block)
 		
 # 当任何一个在 "enemies" 分组的节点发出 "enemy_clicked" 信号时调用
 func on_enemy_clicked(enemy_instance: Node2D):

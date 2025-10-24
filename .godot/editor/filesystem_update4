@@ -11,3 +11,6 @@ res://scenes/battle/enemy.gd
 res://assets/shaders/aiming_arrow.gdshader.txt
 res://assets/shaders/aiming_arrow.gdshader
 res://assets/textures/line_noise.tres
+res://scenes/battle/player.tscn
+res://scenes/battle/projectile.tscn
+res://scenes/battle/projectile.gd

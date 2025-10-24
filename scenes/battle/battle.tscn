@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://c1q5ktackuh2w"]
+[gd_scene load_steps=7 format=3 uid="uid://c1q5ktackuh2w"]
 
 [ext_resource type="Script" uid="uid://bu61lqndr1ixy" path="res://scenes/battle/battle.gd" id="1_7gynk"]
+[ext_resource type="PackedScene" uid="uid://ogpc4bf4a0gs" path="res://scenes/battle/player.tscn" id="2_0yh6x"]
 [ext_resource type="PackedScene" uid="uid://s2n3ceui2b82" path="res://scenes/battle/enemy.tscn" id="2_ffvsa"]
 [ext_resource type="Shader" uid="uid://ceclqkqin851l" path="res://assets/shaders/aiming_arrow.gdshader" id="3_xd4uy"]
 
@@ -17,15 +18,11 @@ point_count = 2
 [node name="Battle" type="Node2D"]
 script = ExtResource("1_7gynk")
 
-[node name="PlayerPlaceholder" type="ColorRect" parent="."]
-offset_left = 50.0
-offset_top = 200.0
-offset_right = 150.0
-offset_bottom = 300.0
-color = Color(0, 0.8, 0, 1)
+[node name="Player" parent="." instance=ExtResource("2_0yh6x")]
+position = Vector2(495, 306)
 
 [node name="Enemy" parent="." instance=ExtResource("2_ffvsa")]
-position = Vector2(648, 255)
+position = Vector2(1371, 328)
 
 [node name="UI_Layer" type="CanvasLayer" parent="."]
 

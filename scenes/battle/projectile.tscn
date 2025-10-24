@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://vpwr7y1vikpj"]
+
+[ext_resource type="Script" uid="uid://ncr46dfr78dw" path="res://scenes/battle/projectile.gd" id="1_orbj0"]
+
+[node name="Projectile" type="Node2D"]
+script = ExtResource("1_orbj0")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -15.0
+offset_top = -5.0
+offset_right = 15.0
+offset_bottom = 5.0
+grow_horizontal = 2
+grow_vertical = 2
