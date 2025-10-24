@@ -1,6 +1,18 @@
-[gd_scene load_steps=2 format=3 uid="uid://c1q5ktackuh2w"]
+[gd_scene load_steps=6 format=3 uid="uid://c1q5ktackuh2w"]
 
 [ext_resource type="Script" uid="uid://bu61lqndr1ixy" path="res://scenes/battle/battle.gd" id="1_7gynk"]
+[ext_resource type="PackedScene" uid="uid://s2n3ceui2b82" path="res://scenes/battle/enemy.tscn" id="2_ffvsa"]
+[ext_resource type="Shader" uid="uid://ceclqkqin851l" path="res://assets/shaders/aiming_arrow.gdshader" id="3_xd4uy"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0yh6x"]
+shader = ExtResource("3_xd4uy")
+shader_parameter/line_color = Color(0.9490196, 0.9372549, 0, 1)
+shader_parameter/glow_strength = 0.50000002375
+shader_parameter/scroll_speed = 0.5000001187500001
+
+[sub_resource type="Curve" id="Curve_ffvsa"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.19908047), 0.0, 0.0, 0, 0]
+point_count = 2
 
 [node name="Battle" type="Node2D"]
 script = ExtResource("1_7gynk")
@@ -12,12 +24,8 @@ offset_right = 150.0
 offset_bottom = 300.0
 color = Color(0, 0.8, 0, 1)
 
-[node name="EnemyPlaceholder" type="ColorRect" parent="."]
-offset_left = 650.0
-offset_top = 200.0
-offset_right = 750.0
-offset_bottom = 300.0
-color = Color(0.8, 0.2, 0.2, 1)
+[node name="Enemy" parent="." instance=ExtResource("2_ffvsa")]
+position = Vector2(648, 255)
 
 [node name="UI_Layer" type="CanvasLayer" parent="."]
 
@@ -28,6 +36,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="HandContainer" type="HBoxContainer" parent="UI_Layer/BattleUI"]
 layout_mode = 0
@@ -72,3 +81,11 @@ offset_bottom = -20.0
 text = "灵力: 3/3"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="AimingArrow" type="Line2D" parent="."]
+visible = false
+z_index = 11
+material = SubResource("ShaderMaterial_0yh6x")
+width = 20.0
+width_curve = SubResource("Curve_ffvsa")
+antialiased = true

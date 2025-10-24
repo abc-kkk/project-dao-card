@@ -78,7 +78,6 @@ func _gui_input(event: InputEvent):
 # --- Godot 核心函数 ---
 func _ready():
 	# @onready 变量在此刻刚刚被赋值
-	
 	# 处理编辑器预览
 	if Engine.is_editor_hint():
 		var test_card = load("res://data/cards/basic_strike.tres")
@@ -92,3 +91,37 @@ func _ready():
 		# 如果是, setter 会跳过 update_display(), 所以我们在这里补上
 		if data:
 			update_display()
+			
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
+
+# [新函数] 当鼠标进入卡牌区域时调用
+func _on_mouse_entered():
+	# 仅在游戏中执行 (防止在编辑器里触发)
+	if Engine.is_editor_hint():
+		return
+		
+	# 1. 把自己提到最上层
+	z_index = 10
+	
+	# 2. 创建一个补间动画 (Tween)
+	var tween = create_tween()
+	
+	# 3. 让 "scale" (缩放) 属性在 0.1 秒内
+	#    从当前值 变到 Vector2(1.5, 1.5)
+	tween.tween_property(self, "scale", Vector2(1.5, 1.5), 0.1)
+
+# [新函数] 当鼠标离开卡牌区域时调用
+func _on_mouse_exited():
+	if Engine.is_editor_hint():
+		return
+		
+	# 1. 恢复 Z 轴
+	z_index = 0
+	
+	# 2. 创建一个补间动画
+	var tween = create_tween()
+	
+	# 3. 让 "scale" 属性在 0.1 秒内
+	#    恢复到 Vector2(1.0, 1.0)
+	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.1)

@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://s2n3ceui2b82"]
+
+[ext_resource type="Script" uid="uid://ba1cls212jxpj" path="res://scenes/battle/enemy.gd" id="1_oqxvf"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oqxvf"]
+size = Vector2(100, 100)
+
+[node name="Enemy" type="Area2D" groups=["enemies"]]
+script = ExtResource("1_oqxvf")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = -50.0
+offset_right = 50.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 0, 0, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_oqxvf")
+
+[connection signal="input_event" from="." to="." method="_on_input_event"]

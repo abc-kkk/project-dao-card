@@ -11,6 +11,13 @@ enum CardType {
 	DAN_YAO,    # 丹药 (消耗品，一次性强力效果)
 	JUE_JI      # 绝技 (高消耗、高回报)
 }
+# [新代码] 定义目标类型
+enum TargetType {
+	NONE,      # 无需目标 (如“基础心法”)
+	ENEMY,     # 必须指定一个敌人 (如“基础拳法”)
+	ALL_ENEMIES, # 攻击所有敌人 (AOE)
+	SELF       # 目标是自己 (一般用于特殊buff)
+}
 
 # -------- 基础信息 --------
 # @export 会把这个变量显示在Godot的“检查器”面板里
@@ -25,6 +32,7 @@ enum CardType {
 # -------- 核心效果 --------
 # 我们先用简单的方式，只定义几个关键数字
 @export_group("效果数值") # 在检查器中创建一个分组
+@export var target_type: TargetType = TargetType.NONE
 @export var damage: int = 0                         # 造成的伤害
 @export var block: int = 0                          # 提供的护甲 (真气护体)
 @export var draw: int = 0                           # 抽几张牌

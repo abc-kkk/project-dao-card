@@ -7,6 +7,7 @@ script = ExtResource("1_5nhb0")
 id = "basic_strike"
 title = "基础拳法"
 description = "造成 {damage} 点伤害"
+target_type = 1
 damage = 6
 fusion_group = "拳法"
 metadata/_custom_type_script = "uid://duejf5y151jec"
